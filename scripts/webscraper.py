@@ -29,7 +29,7 @@ def processWineThread ( offset,  total, winelist, csv_file):
 		page = requests.get(wine_url)
 		tree = html.fromstring(page.text)
 
-		wine_name = tree.xpath('//div[class="catalog-header"]//h1/text()')
+		wine_name = tree.xpath('//div[@class="catalog-header"]//h1/text()')
 		wine_name = ";".join(wine_name)
 		wine_name = wine_name.encode("utf-8").strip()
 
@@ -40,31 +40,31 @@ def processWineThread ( offset,  total, winelist, csv_file):
 		varietal = ";".join(varietalList)
 		varietal = varietal.encode("utf-8").strip()
 
-		appellationList  = tree.xpath('//span[class="appellation"]/a/text()')
+		appellationList  = tree.xpath('//span[@class="appellation"]/a/text()')
 		appellation = ";".join(appellationList)
 		appellation = appellation.encode("utf-8").strip()
 
-		wineryList = tree.xpath('//span[class="brand"]/a/text()')
+		wineryList = tree.xpath('//span[@class="brand"]/a/text()')
 		winery = ";".join(wineryList)
 		winery = winery.encode("utf-8").strip()
 
-		alcoholList = tree.xpath('//span[class="alcohol"]/a/text()')
+		alcoholList = tree.xpath('//span[@class="alcohol"]/a/text()')
 		alcohol = ";".join(alcoholList)
 		alcohol = alcohol.encode("utf-8").strip()
 
-		productionList = tree.xpath('//span[class="caseProduction"]/a/text()')
+		productionList = tree.xpath('//span[@class="caseProduction"]/a/text()')
 		production = ";".join(productionList)
 		production = production.encode("utf-8").strip()
 
-		botle_sizeList = tree.xpath('//span[class="bottleSize"]/a/text()')
+		botle_sizeList = tree.xpath('//span[@class="bottleSize"]/a/text()')
 		bottle_size = ";".join(botle_sizeList)
 		bottle_size = bottle_size.encode("utf-8").strip()
 
-		categoryList = tree.xpath('//span[class="category"]/a/text()')
+		categoryList = tree.xpath('//span[@class="category"]/a/text()')
 		category = ";".join(categoryList)
 		category = category.encode("utf-8").strip()
 
-		importerList = tree.xpath('//span[class="importer"]/a/text()')
+		importerList = tree.xpath('//span[@class="importer"]/a/text()')
 		importer = ";".join(importerList)
 		importer = importer.encode("utf-8").strip()
 
