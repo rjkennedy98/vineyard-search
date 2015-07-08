@@ -29,35 +29,50 @@ def processWineThread ( offset,  total, winelist, csv_file):
 		page = requests.get(wine_url)
 		tree = html.fromstring(page.text)
 
-		wine_name = tree.xpath('//div[class="catalog-header"]/h1[0]/text()')
+		wine_name = tree.xpath('//div[class="catalog-header"]//h1/text()')
 		wine_name = ";".join(wine_name)
-		wine_name = wine_name.encode("utf-8")
+		wine_name = wine_name.encode("utf-8").strip()
 
 		wine_price = tree.xpath('//div[@class="expert-rating "]/span[class="rating"]/text()')
-		wine_price = ";".join(wine_price)
+		wine_price = ";".join(wine_price).strip()
 
 		varietalList = tree.xpath('//span[@id="varietals"]/a/text()')
 		varietal = ";".join(varietalList)
-		varietal = varietal.encode("utf-8")
+		varietal = varietal.encode("utf-8").strip()
 
-		appellation  = ""
+		appellationList  = tree.xpath('//span[class="appellation"]/a/text()')
+		appellation = ";".join(appellationList)
+		appellation = appellation.encode("utf-8").strip()
 
-		winery = ""
+		wineryList = tree.xpath('//span[class="brand"]/a/text()')
+		winery = ";".join(wineryList)
+		winery = winery.encode("utf-8").strip()
 
-		alcohol = ""
+		alcoholList = tree.xpath('//span[class="alcohol"]/a/text()')
+		alcohol = ";".join(alcoholList)
+		alcohol = alcohol.encode("utf-8").strip()
 
-		production = ""
+		productionList = tree.xpath('//span[class="caseProduction"]/a/text()')
+		production = ";".join(productionList)
+		production = production.encode("utf-8").strip()
 
-		bottle_size = ""
+		botle_sizeList = tree.xpath('//span[class="bottleSize"]/a/text()')
+		bottle_size = ";".join(botle_sizeList)
+		bottle_size = bottle_size.encode("utf-8").strip()
 
-		category = ""
+		categoryList = tree.xpath('//span[class="category"]/a/text()')
+		category = ";".join(categoryList)
+		category = category.encode("utf-8").strip()
 
-		importer = ""
+		importerList = tree.xpath('//span[class="importer"]/a/text()')
+		importer = ";".join(importerList)
+		importer = importer.encode("utf-8").strip()
 
 		reviewList = tree.xpath('//div[@itemprop="reviewBody"]/p/text()')
 		review = ""
-		#if len(reviewList) > 0:
-		#	review = base64.b64encode(str(reviewList[0]))
+		if len(reviewList) > 0:
+			reviewText = reviewList[0].encode("utf-8")
+			review = base64.b64encode(reviewText)
 
 		line = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (wine_name ,wine_price, varietal, appellation, winery, alcohol,production,bottle_size,category,importer,review)
 		log.info("(" + thread_name + ") line is=" +line)
