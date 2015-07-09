@@ -10,13 +10,22 @@ import logging
 log = logging.getLogger("webscraper")
 logging.basicConfig(filename='webscraper.log',level=logging.INFO)
 rooturl = "http://buyingguide.winemag.com"
-max_count = 20
+max_count = 1000
 thread_count = 8
 #globally modified by threads
 wine_set = set()
-csv_header = "wine_name,wine_price,varietal,appellation,winery,alcohol,production,bottle_size,category,importer,review\n"
+csv_header = "wine_name,rating,wine_price,varietal,appellation,winery,alcohol,production,bottle_size,category,importer,review)\n"
 mutex = threading.Lock()
 csv_file_name = 'wineinfo.csv'
+
+def get_item(item_list):
+	if len(item_list) > 0:
+		return item_list[0].encode("utf-8").strip().replace('\r','').replace('\n', '')
+	else:
+		return ""
+
+def get_all_items(item_list):
+	return ";".join(item_list).encode("utf-8").strip().replace('\r','').replace('\n', '')
 
 def processWineThread ( offset,  total, winelist, csv_file):
 	thread_name = "Thread-"+str(offset)
@@ -29,44 +38,28 @@ def processWineThread ( offset,  total, winelist, csv_file):
 		page = requests.get(wine_url)
 		tree = html.fromstring(page.text)
 
-		wine_name = tree.xpath('//div[@class="catalog-header"]//h1/text()')
-		wine_name = ";".join(wine_name)
-		wine_name = wine_name.encode("utf-8").strip()
+		wine_name = get_all_items( tree.xpath('//div[@class="catalog-header"]//h1/text()')) 
 
-		wine_price = tree.xpath('//div[@class="expert-rating "]/span[class="rating"]/text()')
-		wine_price = ";".join(wine_price).strip()
+		rating = get_item(tree.xpath('//span[@class="rating"]/text()'))
 
-		varietalList = tree.xpath('//span[@id="varietals"]/a/text()')
-		varietal = ";".join(varietalList)
-		varietal = varietal.encode("utf-8").strip()
+		wine_price = get_item(tree.xpath('//span[@id="price"]/text()') )
 
-		appellationList  = tree.xpath('//span[@class="appellation"]/a/text()')
-		appellation = ";".join(appellationList)
-		appellation = appellation.encode("utf-8").strip()
+		varietal = get_all_items( tree.xpath('//span[@id="varietals"]/a/text()') )
 
-		wineryList = tree.xpath('//span[@class="brand"]/a/text()')
-		winery = ";".join(wineryList)
-		winery = winery.encode("utf-8").strip()
+		appellation  = get_all_items( tree.xpath('//span[@id="appellation"]/a/a/text()') )
 
-		alcoholList = tree.xpath('//span[@class="alcohol"]/a/text()')
-		alcohol = ";".join(alcoholList)
-		alcohol = alcohol.encode("utf-8").strip()
+		winery = get_item( tree.xpath('//span[@id="brand"]/a/text()') )
 
-		productionList = tree.xpath('//span[@class="caseProduction"]/a/text()')
-		production = ";".join(productionList)
-		production = production.encode("utf-8").strip()
+		alcohol = get_item( tree.xpath('//span[@id="alcohol"]/text()') )
 
-		botle_sizeList = tree.xpath('//span[@class="bottleSize"]/a/text()')
-		bottle_size = ";".join(botle_sizeList)
-		bottle_size = bottle_size.encode("utf-8").strip()
+		production = get_item( tree.xpath('//span[@id="caseProduction"]/text()') )
 
-		categoryList = tree.xpath('//span[@class="category"]/a/text()')
-		category = ";".join(categoryList)
-		category = category.encode("utf-8").strip()
+		bottle_size = get_item( tree.xpath('//span[@id="bottleSize"]/text()') )
 
-		importerList = tree.xpath('//span[@class="importer"]/a/text()')
-		importer = ";".join(importerList)
-		importer = importer.encode("utf-8").strip()
+
+		category = get_all_items(tree.xpath('//span[@id="category"]/a/text()'))
+
+		importer = get_item( tree.xpath('//span[@id="importer"]/text()') )
 
 		reviewList = tree.xpath('//div[@itemprop="reviewBody"]/p/text()')
 		review = ""
@@ -74,7 +67,7 @@ def processWineThread ( offset,  total, winelist, csv_file):
 			reviewText = reviewList[0].encode("utf-8")
 			review = base64.b64encode(reviewText)
 
-		line = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (wine_name ,wine_price, varietal, appellation, winery, alcohol,production,bottle_size,category,importer,review)
+		line = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (wine_name , rating, wine_price, varietal, appellation, winery, alcohol,production,bottle_size,category,importer,review)
 		log.info("(" + thread_name + ") line is=" +line)
 
 		csv_file.write(line)
